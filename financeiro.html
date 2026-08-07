@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sou Fitness Dashboard</title>
+
+    <link rel="stylesheet" href="alunos.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+
+  <style>
+    .container { display: flex; min-height: 100vh; }
+    #menu { width: 260px; background: #111; min-height: 100vh; }
+    main { flex: 1; padding: 30px; background: var(--bg); overflow-y: auto; color: white; }
+    h1, h2, h3 { color: white; }
+    .filtros-pagamento { margin-bottom: 20px; display: flex; gap: 10px; }
+    .btn-filtro { padding: 8px 15px; border-radius: 5px; border: 1px solid var(--border); background: var(--card); color: white; cursor: pointer; text-decoration: none; font-size: 14px; }
+    .btn-filtro:hover { background: #1a2230; }
+    .financeiro-section { margin-top: 30px; }
+    .financeiro-section h2 { font-size: 1.2rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+    .status-hoje { border-left: 4px solid var(--primary); }
+    .status-atraso { border-left: 4px solid #EF4444; }
+  </style>
+
+  <body>
+    <div class="container">
+      <div id="menu"></div>
+
+      <main>
+        <div class="user-header"></div>
+        <header>
+          <h1>💰 Gestão Financeira</h1>
+          <p>Acompanhe a saúde do caixa e controle de inadimplência.</p>
+        </header>
+
+        <div class="financeiro-container">
+            <!-- Lateral: Busca e Seleção -->
+            <aside>
+                <div class="card" style="padding: 15px;">
+                    <input type="text" id="buscaNome" placeholder="🔍 Pesquisar aluno..." style="margin-bottom: 15px;">
+                    <div id="listaSelecaoAlunos" class="aluno-selection-list">
+                        <p style="color: var(--muted); text-align: center;">Carregando alunos...</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Centro: Ficha do Aluno Selecionado -->
+            <section id="detalheAluno" style="display: none;">
+                <div class="card">
+                    <div class="student-profile-header">
+                        <div class="profile-photo-large" id="profileIcon">👤</div>
+                        <div class="profile-info">
+                            <h2 id="profileNome">---</h2>
+                            <p id="profilePlanoMatricula" style="margin-bottom: 2px;">Plano: --- | Matrícula: ---</p>
+                            <p id="profileDataInicio" style="font-size: 11px; color: var(--muted); margin-bottom: 2px;"></p>
+                            <p id="profileDataMudanca" style="font-size: 11px; color: var(--muted); margin-bottom: 8px; display: none;"></p>
+                            <div id="planSwitcher" style="display:none; margin-bottom: 15px; gap: 8px; align-items: center; flex-wrap: wrap; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+                                <select id="selectTrocarPlano" style="width: 220px; padding: 6px; font-size: 13px;"></select>
+                                <button id="btnConfirmarTroca" class="btn-salvar" style="padding: 6px 12px; font-size: 13px; margin:0;">Confirmar Mudança</button>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span id="profileStatus" class="status-badge">Ativo</span>
+                                <button onclick="window.togglePlanSwitcher()" style="background:none; border:none; color:var(--primary); cursor:pointer; font-size: 12px; text-decoration: underline; padding: 0;">⚡ Alterar Plano</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-nav">
+                        <button class="tab-btn active" onclick="switchTab('tabFinanceiro')">💰 Financeiro</button>
+                        <button class="tab-btn" onclick="switchTab('tabTreino')">🏋️ Treino</button>
+                        <button class="tab-btn" onclick="switchTab('tabAvaliacao')">📊 Avaliações</button>
+                    </div>
+
+                    <!-- Conteúdo Financeiro -->
+                    <div id="tabFinanceiro" class="tab-content active">
+                        <div class="resumo-extrato">
+                            <div class="resumo-item"><small>Total Pago (Ano)</small><strong id="extratoPago">R$ 0,00</strong></div>
+                            <div class="resumo-item"><small>Total Atrasado</small><strong id="extratoAtrasado" style="color: #EF4444;">R$ 0,00</strong></div>
+                            <div class="resumo-item"><small>Data de Início</small><strong id="extratoInicio">--/--/----</strong></div>
+                            <div class="resumo-item"><small>Tempo de Casa</small><strong id="extratoTempo">0 meses</strong></div>
+                        </div>
+
+                        <div id="transparenciaPlanos" style="margin-bottom: 25px; display: none;">
+                            <h4 style="font-size: 12px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px;">📈 Evolução de Planos e Valores</h4>
+                            <div id="timelineEras" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;"></div>
+                        </div>
+
+                        <h3>Histórico de Mensalidades</h3>
+                        <table>
+                            <thead>
+                                <tr><th>Mês/Ano</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Ações</th></tr>
+                            </thead>
+                            <tbody id="extratoTabelaCorpo"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Conteúdo Treino (Placeholder) -->
+                    <div id="tabTreino" class="tab-content">
+                        <div style="text-align: center; padding: 40px; color: var(--muted);">
+                            <h3>💪 Ficha de Treino</h3>
+                            <p>Módulo de treinos em desenvolvimento.</p>
+                        </div>
+                    </div>
+
+                    <!-- Conteúdo Avaliação (Placeholder) -->
+                    <div id="tabAvaliacao" class="tab-content">
+                        <div style="text-align: center; padding: 40px; color: var(--muted);">
+                            <h3>📏 Avaliações Físicas</h3>
+                            <p>Módulo de avaliações antropométricas em desenvolvimento.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mensagem Inicial -->
+            <div id="msgSelecione" style="flex: 1; display: flex; align-items: center; justify-content: center; color: var(--muted); border: 2px dashed var(--border); border-radius: 15px; background: rgba(0,0,0,0.1);">
+                <h3>👈 Selecione um aluno na lista ao lado para gerenciar</h3>
+            </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="financeiro.js"></script>
+    <script>
+      fetch("menu.html")
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById("menu").innerHTML = data;
+        });
+    </script>
+  </body>
+</html>

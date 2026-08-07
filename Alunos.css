@@ -1,0 +1,426 @@
+/* GLOBAL VARIABLES & RESET */
+:root{
+    --bg:#0B0F17;
+    --card:#141B24;
+    --border:#1E293B;
+    --primary:#FFD400;
+    --success:#22C55E;
+    --text:#FFFFFF;
+    --muted:#AAB3C5;
+}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
+
+body{
+    background-color:var(--bg);
+    background-image: radial-gradient(circle at top right, #161e2d, transparent);
+    color:white;
+    color-scheme: dark; /* Essencial para que o calendário do navegador siga o tema escuro */
+    line-height: 1.5;
+}
+.container{
+    width: 100%;
+}
+
+header{
+    margin-bottom:25px;
+}
+
+header h1{
+    font-size:38px;
+}
+
+header p{
+    color:var(--muted);
+}
+
+.card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.card h2{
+    margin-bottom:20px;
+    color:var(--primary);
+}
+
+.grid-2,
+.grid-3,
+.grid-4{
+    display:grid;
+    gap:15px;
+}
+
+.grid-2{
+    grid-template-columns:repeat(2,1fr);
+}
+
+.grid-3{
+    grid-template-columns:repeat(3,1fr);
+}
+
+.grid-4{
+    grid-template-columns:repeat(4,1fr);
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+}
+
+input,
+select{
+    width:100%;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#0f172a;
+    color:white;
+}
+
+.botoes{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+button{
+    border:none;
+    padding:14px 25px;
+    border-radius:8px;
+    transition: all 0.2s ease;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.btn-salvar{
+    background:var(--primary);
+    color:black;
+}
+.btn-salvar:hover{
+    background: #e6bf00;
+    transform: translateY(-1px);
+}
+
+.btn-limpar{
+    background:#334155;
+    color:white;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top: 10px;
+}
+
+th{
+    background:#1E293B;
+    color:var(--primary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+th,
+td{
+    padding:15px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+}
+
+tr:hover{
+    background:rgba(255, 255, 255, 0.02);
+}
+
+.status-select {
+    background: #0f172a;
+    color: white;
+    border: 1px solid var(--border);
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.badge-pagamento {
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 80px;
+    font-size: 12px;
+}
+
+.pago { background: var(--success); color: white; }
+.atrasado { background: #EF4444; color: white; }
+.pendente { background: #F59E0B; color: white; }
+.futura { background: #64748b; color: white; } /* Cor cinza para parcelas futuras */
+
+/* Novos Status Profissionais */
+.status-bloqueado { background: #000000; color: #FFD400; border: 1px solid var(--primary); }
+.status-suspenso { background: #475569; color: white; }
+.status-inadimplente { background: #991b1b; color: white; }
+
+/* Estilo para as seções do Financeiro */
+.financeiro-section h2 {
+    font-size: 1.1rem;
+    border-left: 4px solid var(--primary);
+    padding-left: 12px;
+    margin-top: 40px;
+}
+
+/* --- Estilos do Modal de Extrato Financeiro --- */
+.modal-extrato { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+.modal-content { background: var(--card); margin: 5% auto; padding: 30px; border: 1px solid var(--border); width: 80%; max-width: 800px; border-radius: 15px; max-height: 85vh; overflow-y: auto; color: white; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+.resumo-extrato { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+.resumo-item { background: #0f172a; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+
+/* Estilo para destacar o ícone do calendário no input de data */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.8); /* Deixa o ícone do calendário mais visível no fundo escuro */
+}
+
+.resumo-item small { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; margin-bottom: 5px; }
+.resumo-item strong { font-size: 1.2rem; color: var(--primary); }
+.btn-fechar { background: #334155; color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer; border: none; font-weight: 600; }
+
+@media print {
+    .modal-extrato { position: absolute; background: white; color: black; }
+    .modal-content { border: none; width: 100%; margin: 0; padding: 0; }
+    .btn-fechar, #menu, .no-print { display: none !important; }
+}
+
+/* Switch Toggle Styles */
+.switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 42px;
+    height: 22px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider-toggle {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #334155;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider-toggle:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider-toggle {
+    background-color: var(--success);
+}
+
+input:checked + .slider-toggle:before {
+    transform: translateX(20px);
+}
+
+/* Estilos para Notificações Profissionais (Toast) */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease-out;
+}
+.toast-success { background: var(--success); border-left: 5px solid #166534; }
+.toast-error { background: #EF4444; border-left: 5px solid #991b1b; }
+.toast-info { background: #3b82f6; border-left: 5px solid #1d4ed8; }
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* --- Layout Moderno da Ficha do Aluno --- */
+.financeiro-container {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.aluno-selection-list {
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+}
+
+.aluno-item-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.aluno-item-card:hover { border-color: var(--primary); background: rgba(255, 212, 0, 0.05); }
+.aluno-item-card.active { border-color: var(--primary); background: rgba(255, 212, 0, 0.1); }
+
+.aluno-avatar-circle {
+    width: 45px;
+    height: 45px;
+    background: #1E293B;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--primary);
+    border: 1px solid var(--border);
+}
+
+.student-profile-header {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+    padding-bottom: 25px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 25px;
+}
+
+.profile-photo-large {
+    width: 100px;
+    height: 100px;
+    background: #1E293B;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    border: 2px solid var(--primary);
+}
+
+.profile-info h2 { margin: 0; font-size: 1.8rem; }
+.profile-info p { color: var(--muted); margin: 5px 0; }
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Tabs System */
+.tab-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    background: #0f172a;
+    padding: 5px;
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.tab-btn {
+    background: transparent;
+    padding: 10px 20px;
+    color: var(--muted);
+    border-radius: 8px;
+}
+
+/* Estilos para o Header de Usuário */
+.user-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.user-info-box {
+    text-align: right;
+    line-height: 1.2;
+}
+
+.user-info-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text);
+    display: block;
+}
+
+.user-info-role {
+    font-size: 0.7rem;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.btn-logout-header {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-weight: 600;
+}
+
+.btn-logout-header:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.tab-btn.active {
+    background: var(--primary);
+    color: black;
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+@media print {
+    #menu, .no-print, header, .botoes, input[type="text"] {
+        display: none !important;
+    }
+    main { padding: 0 !important; }
+    .card { border: none !important; box-shadow: none !important; }
+}

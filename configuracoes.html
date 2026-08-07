@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Configurações - Sou Fitness</title>
+    <link rel="stylesheet" href="alunos.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      .container { display: flex; min-height: 100vh; }
+      #menu { width: 260px; background: #111; min-height: 100vh; }
+      main { flex: 1; padding: 30px; background: var(--bg); overflow-y: auto; color: white; }
+      .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+      .form-group { margin-bottom: 15px; }
+      .btn-acao { padding: 10px; border-radius: 8px; cursor: pointer; border: none; font-weight: 600; width: 100%; margin-top: 10px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="menu"></div>
+      <main>
+        <div class="user-header"></div>
+        <header>
+          <h1>Configurações do Sistema</h1>
+          <p>Gerencie seus planos de mensalidade e dados de recebimento PIX.</p>
+        </header>
+
+        <div class="config-grid">
+          <!-- Configuração PIX -->
+          <div class="card">
+            <h2>🔑 Dados de Recebimento PIX</h2>
+            <div class="form-group">
+              <label>Chave PIX (CPF, E-mail ou Celular)</label>
+              <input type="text" id="cfg_pix_chave" placeholder="Sua chave aqui">
+            </div>
+            <div class="form-group">
+              <label>Nome do Beneficiário</label>
+              <input type="text" id="cfg_pix_nome" placeholder="Nome Completo">
+            </div>
+            <div class="form-group">
+              <label>Cidade</label>
+              <input type="text" id="cfg_pix_cidade" placeholder="Ex: SAO PAULO">
+            </div>
+            <button onclick="salvarConfigPix()" class="btn-salvar btn-acao">Salvar Dados PIX</button>
+          </div>
+
+          <!-- Gestão de Planos -->
+          <div class="card">
+            <h2>🏋️ Gestão de Planos</h2>
+            <form id="formPlano">
+              <div class="form-group">
+                <label>Nome do Plano</label>
+                <input type="text" id="plano_nome" required placeholder="Ex: Musculação Premium">
+              </div>
+              <div class="form-group">
+                <label>Valor Mensal (R$)</label>
+                <input type="text" id="plano_valor" required placeholder="R$ 0,00">
+              </div>
+              <button type="submit" class="btn-salvar btn-acao">Adicionar/Atualizar Plano</button>
+            </form>
+            
+            <table style="margin-top: 20px; font-size: 14px;">
+              <thead>
+                <tr><th>Plano</th><th>Valor</th><th>Ação</th></tr>
+              </thead>
+              <tbody id="tabelaConfigPlanos"></tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="configuracoes.js"></script>
+    <script>
+      fetch("menu.html").then(res => res.text()).then(html => document.getElementById("menu").innerHTML = html);
+      
+      // Make editPlanoId global for script.js to manage
+      window.editPlanoId = null; 
+      document.addEventListener('DOMContentLoaded', async () => {
+        // Carrega as configurações PIX do Supabase
+        await window.carregarConfigPix();
+        // Carrega a tabela de planos do Supabase
+        await window.carregarTabelaPlanosConfig();
+      });
+
+      // Lógica para Salvar ou Atualizar Plano
+      document.getElementById('formPlano').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('plano_nome').value;
+        const valorRaw = document.getElementById('plano_valor').value;
+        const valor = parseFloat(valorRaw.replace('R$', '').replace(/\./g, '').replace(',', '.').replace(/\s/g, '').trim()) || 0;
+        
+        window.salvarPlano({ id: window.editPlanoId, nome, valor }); // Call the global function
+
+        window.editPlanoId = null; // Reset edit mode after saving
+        document.querySelector('#formPlano button[type="submit"]').innerText = 'Adicionar/Atualizar Plano';
+        document.getElementById('formPlano').reset();
+      });
+      // The functions window.salvarConfigPix, window.editarPlanoConfig, and window.removerPlanoConfig
+      // are now defined in script.js and made globally accessible.
+      // They are called directly from the HTML elements.
+    </script>
+  </body>
+</html>

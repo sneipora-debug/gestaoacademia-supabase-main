@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Meu Plano - Sou Fitness</title>
+    <link rel="stylesheet" href="alunos.css">
+    <style>
+        body { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .card-plano { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
+        .btn-pix { background: #7c3aed; color: white; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="card-plano">
+        <h2 id="nomeAluno">Carregando...</h2>
+        <p id="detalhePlano" style="color: var(--muted);"></p>
+        
+        <div style="margin-top: 30px;">
+            <h3>Próxima Mensalidade</h3>
+            <div id="mensalidadeAberta" style="padding: 20px; background: rgba(245,158,11,0.1); border: 1px solid #f59e0b; border-radius: 12px; margin-top: 10px;">
+                <p id="valorMensalidade" style="font-size: 24px; font-weight: 800; color: var(--primary);">---</p>
+                <p id="vencimentoMensalidade" style="font-size: 14px;"></p>
+                <button id="btnPagarPix" class="btn-pix">Pagar com PIX</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+        import { supabaseClient } from './supabase_client.js';
+        import { formatarMoeda, gerarPix } from './utils.js';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) { window.location.href = 'login.html'; return; }
+
+            const { data: aluno } = await supabaseClient.from('alunos').select('*').eq('user_id', user.id).single();
+            const { data: cobranca } = await supabaseClient.from('cobrancas').select('*').eq('aluno_id', aluno.id).eq('status', 'PENDENTE').limit(1).single();
+
+            document.getElementById('nomeAluno').innerText = `Olá, ${aluno.nome.split(' ')[0]}!`;
+            document.getElementById('detalhePlano').innerText = `Seu plano: ${aluno.plano}`;
+
+            if (cobranca) {
+                document.getElementById('valorMensalidade').innerText = formatarMoeda(cobranca.valor);
+                document.getElementById('vencimentoMensalidade').innerText = `Vence em: ${new Date(cobranca.vencimento).toLocaleDateString('pt-BR')}`;
+                document.getElementById('btnPagarPix').onclick = () => window.gerarPix(aluno.id, cobranca.valor);
+            } else {
+                document.getElementById('mensalidadeAberta').innerHTML = "<p>✅ Você está em dia!</p>";
+            }
+        });
+        window.gerarPix = gerarPix;
+    </script>
+</body>
+</html>
