@@ -572,4 +572,4 @@ input:checked + .slider-toggle:before {
     .botoes {
         flex-direction: column;
     }
-}
+
