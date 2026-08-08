@@ -16,6 +16,15 @@
       .modal-senha-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
       .btn-fechar-modal { background: rgba(255,255,255,0.08); border: none; color: #aab3c5; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; }
       .input-senha-container { position: relative; display: flex; align-items: center; margin-top: 5px; }
+
+      @media (max-width: 768px) {
+        .container { flex-direction: column; }
+        #menu { width: 100%; min-height: auto; }
+        main { padding: 15px; }
+        .form-grid { grid-template-columns: 1fr; }
+        .user-header { justify-content: center; }
+        header h1 { font-size: 1.8rem; }
+      }
     </style>
   </head>
   <body>

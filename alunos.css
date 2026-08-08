@@ -424,3 +424,44 @@ input:checked + .slider-toggle:before {
     main { padding: 0 !important; }
     .card { border: none !important; box-shadow: none !important; }
 }
+
+/* --- Responsividade para Celular --- */
+@media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .financeiro-container {
+        grid-template-columns: 1fr;
+    }
+
+    .student-profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+        padding: 15px;
+    }
+
+    .resumo-extrato {
+        grid-template-columns: 1fr;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    header h1 {
+        font-size: 28px;
+    }
+
+    .botoes {
+        flex-direction: column;
+    }
+}

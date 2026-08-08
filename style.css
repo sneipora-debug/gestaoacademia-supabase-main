@@ -210,3 +210,38 @@ main{
     text-transform: uppercase;
 }
 .badge-pendente { background: #f59e0b; color: #fff; }
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 20px;
+    }
+
+    .sidebar ul {
+        display: flex;
+        overflow-x: auto;
+        margin-top: 20px;
+        padding-bottom: 10px;
+        gap: 10px;
+    }
+
+    .sidebar li {
+        white-space: nowrap;
+        margin-bottom: 0;
+        padding: 10px 15px;
+    }
+
+    .cards, .graficos, .inferior {
+        grid-template-columns: 1fr;
+    }
+
+    .topo h2 {
+        font-size: 28px;
+    }
+}
