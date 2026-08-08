@@ -24,7 +24,8 @@ async function carregarListaSelecao() {
     const { data: alunos } = await supabaseClient
         .from("alunos")
         .select("*")
-        .or('role.eq.student,role.is.null') // Apenas alunos podem ser cobrados
+        .or('role.eq.student,role.is.null')
+        .not('role', 'in', '("admin","professor","staff")') // Remove equipe do financeiro
         .order("nome");
     
     const lista = document.getElementById("listaSelecaoAlunos");

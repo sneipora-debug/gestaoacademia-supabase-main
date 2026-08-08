@@ -773,11 +773,26 @@ document.addEventListener("DOMContentLoaded", () => {
       return; // [cite: 1002]
     }
 
-    const { data: alunos, error } = await supabaseClient // [cite: 1005]
-      .from("alunos") // [cite: 1006]
-      .select("*") // [cite: 1007]
-      .or('role.eq.student,role.is.null') // Garante que apenas ALUNOS apareçam nesta tela
-      .order("nome", { ascending: true }); // [cite: 1008]
+    // Busca o perfil de quem está logado para aplicar o filtro de hierarquia
+    const { data: { user: authUser } } = await supabaseClient.auth.getUser();
+    const { data: profile } = await supabaseClient.from("equipe").select("id, role").eq("user_id", authUser?.id).maybeSingle();
+
+    let query = supabaseClient
+      .from("alunos")
+      .select("*")
+      .order("nome", { ascending: true });
+
+    // HIERARQUIA: Professor só vê os alunos dele
+    if (profile && profile.role === 'professor') {
+        query = query.eq('professor_id', profile.id);
+    } 
+    // Se não for professor nem admin/master, bloqueia (segurança extra)
+    else if (!profile || !['master', 'admin', 'staff'].includes(profile.role)) {
+        // Se for aluno logado ou algo estranho, filtra pelo próprio user_id
+        query = query.eq('user_id', authUser?.id);
+    }
+
+    const { data: alunos, error } = await query;
 
     if (error) {
       // [cite: 1009]
@@ -948,6 +963,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return; // [cite: 1044]
       }
 
+      // Identifica o perfil de quem está cadastrando
+      const { data: { user: authUser } } = await supabaseClient.auth.getUser();
+      const { data: profile } = await supabaseClient.from("equipe").select("id, role").eq("user_id", authUser?.id).maybeSingle();
+
       // Garante que a matrícula não esteja vazia
       let matriculaValor = document.getElementById("matricula")?.value.trim();
       if (!matriculaValor) {
@@ -959,6 +978,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // [cite: 1048]
         nome: document.getElementById("nome").value, // [cite: 1049]
         matricula: matriculaValor,
+        role: 'student', // Define como aluno no cadastro
+        // Se for um Professor cadastrando, vincula o aluno a ele automaticamente
+        professor_id: (profile && profile.role === 'professor') ? profile.id : null,
         cpf: document.getElementById("cpf").value || null, // [cite: 1050]
         rg: document.getElementById("rg")?.value || null,
         responsavel: document.getElementById("responsavel")?.value || null,

@@ -141,16 +141,26 @@ export const inicializarHeaderUsuario = async () => {
         return;
     }
 
-    const { data: profile } = await supabaseClient
-        .from('alunos')
+    // Busca o perfil primeiro na equipe, depois em alunos
+    let { data: profile } = await supabaseClient
+        .from('equipe')
         .select('nome, role')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();
+
+    if (!profile) {
+        const { data: student } = await supabaseClient
+            .from('alunos')
+            .select('nome')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+        if (student) profile = { ...student, role: 'student' };
+    }
 
     headerContainer.innerHTML = `
         <div class="user-info-box">
             <span class="user-info-name">${profile?.nome || 'Usuário'}</span>
-            <span class="user-info-role">${profile?.role === 'admin' ? 'Administrador' : 'Colaborador'}</span>
+            <span class="user-info-role">${profile?.role === 'admin' ? 'Administrador' : profile?.role === 'professor' ? 'Professor' : 'Colaborador'}</span>
         </div>
         <button class="btn-logout-header" id="btnLogoutHeader">Sair</button>
     `;

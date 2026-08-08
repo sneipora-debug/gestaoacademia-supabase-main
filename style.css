@@ -186,3 +186,27 @@ main{
 .info span{
     color:var(--muted);
 }
+
+/* Estilos adaptados do sistema Agro */
+.solicitacao-card {
+    background: #1a2230;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.solicitacao-info h4 { color: var(--primary); margin-bottom: 5px; }
+.solicitacao-info p { font-size: 13px; color: var(--muted); margin: 2px 0; }
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.badge-pendente { background: #f59e0b; color: #fff; }

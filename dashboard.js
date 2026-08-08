@@ -8,7 +8,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Acorda o banco de dados para conferir se precisa gerar parcelas novas para o mês atual
     await supabaseClient.rpc('gerar_mensalidades_automaticas');
 
-    const { data: alunos } = await supabaseClient.from("alunos").select("*");
+    // Busca estatísticas apenas de alunos
+    const { data: alunos } = await supabaseClient
+        .from("alunos")
+        .select("*")
+        .or('role.eq.student,role.is.null')
+        .not('role', 'in', '("admin","professor","staff")');
+        
     const { data: pagamentos } = await supabaseClient.from("pagamentos").select("*");
     const { data: cobrancas } = await supabaseClient.from("cobrancas").select("*");
 
