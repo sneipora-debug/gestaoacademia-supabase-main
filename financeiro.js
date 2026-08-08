@@ -12,7 +12,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     await inicializarHeaderUsuario();
 
     // Garante que ao abrir o financeiro, o sistema já processou as mensalidades do mês
-    await supabaseClient.rpc('gerar_mensalidades_automaticas');
+    try {
+        await supabaseClient.rpc('gerar_mensalidades_automaticas');
+    } catch (e) { console.warn("Falha na geração automática:", e); }
     
     await carregarListaSelecao();
     document.getElementById("buscaNome")?.addEventListener("input", carregarListaSelecao);
@@ -21,12 +23,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function carregarListaSelecao() {
     const termo = normalizarTexto(document.getElementById("buscaNome")?.value || "");
-    const { data: alunos } = await supabaseClient
-        .from("alunos")
-        .select("*")
-        .or('role.eq.student,role.is.null')
-        .not('role', 'in', '("admin","professor","staff")') // Remove equipe do financeiro
-        .order("nome");
+    
+    // HIERARQUIA: Busca o perfil para filtrar alunos por professor
+    const { data: { user: authUser } } = await supabaseClient.auth.getUser();
+    const { data: profile } = await supabaseClient.from("equipe").select("id, role").eq("user_id", authUser?.id).maybeSingle();
+
+    let query = supabaseClient.from("alunos").select("*").order("nome");
+
+    if (profile && profile.role === 'professor') {
+        query = query.eq('professor_id', profile.id);
+    } else if (!profile || !['master', 'admin', 'staff'].includes(profile.role)) {
+        query = query.eq('user_id', authUser?.id);
+    }
+
+    const { data: alunos } = await query;
     
     const lista = document.getElementById("listaSelecaoAlunos");
     if (!lista) return;
@@ -240,8 +250,4 @@ async function confirmarTrocaPlano() {
     mostrarToast(`Plano atualizado com sucesso!`);
     document.getElementById('planSwitcher').style.display = 'none';
     carregarFichaFinanceira(alunoIdAtual);
-}
-
-// Expondo para o HTML (onclick)
-window.switchTab = (tabId) => {
 }

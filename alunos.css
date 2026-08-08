@@ -23,7 +23,38 @@ body{
     line-height: 1.5;
 }
 .container{
+    display: flex;
+    min-height: 100vh;
     width: 100%;
+    background: var(--bg);
+}
+
+#menu {
+    width: 260px;
+    background: #050A12;
+    min-height: 100vh;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    overflow-x: hidden;
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+}
+
+#menu.collapsed {
+    width: 0;
+    border-right-width: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+main { 
+    flex: 1; 
+    padding: 0 30px 30px 30px; 
+    overflow-y: auto; 
+    width: 100%; 
+    transition: all 0.3s ease; 
 }
 
 header{
@@ -364,12 +395,42 @@ input:checked + .slider-toggle:before {
 /* Estilos para o Header de Usuário */
 .user-header {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
+    gap: 20px;
+    padding: 20px 0;
+    margin-bottom: 30px;
     border-bottom: 1px solid var(--border);
+    width: 100%;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.btn-toggle-menu {
+    background: var(--card);
+    color: var(--primary);
+    border: 1px solid var(--border);
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-toggle-menu:hover {
+    background: var(--primary);
+    color: black;
+}
+
+.user-right-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .user-info-box {
@@ -425,11 +486,58 @@ input:checked + .slider-toggle:before {
     .card { border: none !important; box-shadow: none !important; }
 }
 
-/* --- Responsividade para Celular --- */
+/* --- Responsividade Mobile (Estilo Aplicativo Bancário) --- */
 @media (max-width: 768px) {
-    .grid-2, .grid-3, .grid-4 {
-        grid-template-columns: 1fr;
+    .container {
+        flex-direction: column !important;
     }
+
+    .user-header {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 70px;
+        padding: 0 20px !important;
+        margin-bottom: 0 !important;
+        z-index: 2001;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    #menu {
+        position: fixed !important;
+        top: 70px;
+        left: 0;
+        width: 100% !important;
+        height: calc(100vh - 70px) !important;
+        z-index: 2000;
+        border-right: none !important;
+        transform: translateX(0);
+        transition: transform 0.3s ease-in-out !important;
+    }
+
+    #menu.collapsed {
+        transform: translateX(-100%);
+        opacity: 1; /* Mantemos opacidade mas movemos para fora */
+        display: block !important;
+    }
+
+    main {
+        padding: 90px 20px 20px 20px !important; /* Espaço para a barra fixa */
+    }
+
+    .user-info-box {
+        display: none; /* Esconde texto longo no celular para sobrar espaço */
+    }
+
+    .grid-2, .grid-3, .grid-4, .config-grid, .dashboard-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .botoes {
+        flex-direction: column;
+    }
+}
 
     .financeiro-container {
         grid-template-columns: 1fr;

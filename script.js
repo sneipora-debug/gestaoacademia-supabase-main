@@ -1,26 +1,16 @@
+import { supabaseClient } from './supabase_client.js';
+import { mostrarToast, normalizarTexto, limparMoeda, formatarMoeda, inicializarHeaderUsuario } from './utils.js';
+
 // =========================================================================
 // CONFIGURAÇÃO E INICIALIZAÇÃO DO SUPABASE
 // =========================================================================
-const SUPABASE_URL = "https://ltuepchgoxagpquwalbi.supabase.co"; // [cite: 902]
-const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0dWVwY2hnb3hhZ3BxdXdhbGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDczMjYsImV4cCI6MjA5NjE4MzMyNn0.g7742A-X_TM-YOZDB40e2aweKfxAfr4xbF29_NlsC2Q"; // [cite: 903, 904]
-
-// Inicializa o cliente global uma única vez no topo do arquivo
-const supabaseClient = window.supabase
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-  : null; // [cite: 906, 907, 908]
-
-if (!supabaseClient) {
-  // [cite: 909]
-  console.error(
-    "Erro: A biblioteca do Supabase não foi carregada no HTML ou as chaves estão incorretas."
-  ); // [cite: 910, 911, 912]
-}
-
 // =========================================================================
 // INICIALIZAÇÃO DO SISTEMA E VARIÁVEIS DE ESCOPO
 // =========================================================================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  // Inicializa o cabeçalho e segurança
+  await inicializarHeaderUsuario();
+
   // [cite: 917]
   // Elementos comuns do DOM
   const form = document.getElementById("formAluno"); // [cite: 919]
@@ -70,44 +60,6 @@ document.addEventListener("DOMContentLoaded", () => {
     inputFiltroAno.value = anoFiltro;
   }
   atualizarVariaveisFiltro();
-
-  // Funções Auxiliares locais
-  const normalizarTexto = (
-    txt // [cite: 926]
-  ) =>
-    String(txt) // [cite: 927]
-      .toLowerCase() // [cite: 928]
-      .trim() // [cite: 929]
-      .normalize("NFD") // [cite: 930]
-      .replace(/[\u0300-\u036f]/g, ""); // [cite: 931]
-
-  const limparMoeda = (
-    valor // [cite: 932]
-  ) =>
-    parseFloat(
-      // [cite: 933]
-      String(valor) // [cite: 934]
-        .replace(/[R$\s.]/g, "") // [cite: 935]
-        .replace(",", ".") // [cite: 936]
-    ) || 0; // [cite: 937]
-
-  const formatarMoeda = (
-    valor // [cite: 938]
-  ) =>
-    Number(valor).toLocaleString("pt-BR", {
-      // [cite: 939]
-      style: "currency", // [cite: 940]
-      currency: "BRL", // [cite: 941]
-    });
-
-  window.mostrarToast = (msg, tipo = "success") => { // Made global
-    const toast = document.createElement("div");
-    toast.className = `toast toast-${tipo}`;
-    toast.innerText = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000); // Remove após 3 segundos
-  };
-  const mostrarToast = window.mostrarToast; // Keep local reference for existing calls
 
   const atualizarDashboard = () => console.log("Dashboard atualizado."); // [cite: 945]
   
@@ -1030,7 +982,9 @@ document.addEventListener("DOMContentLoaded", () => {
         mostrarToast("Aluno salvo com sucesso!"); 
         form.reset(); // [cite: 1086]
         gerarMatriculaAutomatica(); // Gera uma nova para o próximo cadastro
-        await window.verificarGeracaoMensalidades(); // GERA A PARCELA DO MÊS ATUAL NA HORA
+        try {
+            await window.verificarGeracaoMensalidades(); // GERA A PARCELA DO MÊS ATUAL NA HORA
+        } catch (e) { console.warn("Erro ao gerar mensalidade inicial:", e); }
         if (imcInput) imcInput.value = ""; // [cite: 1087]
         await carregarAlunos(); // [cite: 1089]
       } catch (erroBanco) {
@@ -1354,11 +1308,35 @@ document.addEventListener("DOMContentLoaded", () => {
   if (pesoInput) pesoInput.addEventListener("input", calcularIMC); // [cite: 1368]
   if (alturaInput) alturaInput.addEventListener("input", calcularIMC); // [cite: 1369]
 
+  // =========================================================================
+  // EVENT LISTENERS PARA CONFIGURAÇÕES (PIX E PLANOS)
+  // =========================================================================
+  document.getElementById("formConfigPix")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    window.salvarConfigPix();
+  });
+
+  document.getElementById("formPlano")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const data = {
+      id: window.editPlanoId,
+      nome: document.getElementById("plano_nome").value,
+      valor: limparMoeda(document.getElementById("plano_valor").value)
+    };
+    window.salvarPlano(data);
+    e.target.reset();
+    window.editPlanoId = null;
+    e.target.querySelector('button[type="submit"]').innerText = '💾 Salvar Plano';
+  });
 
   // Inicialização final corrigida para evitar erros de sintaxe
   window.inicializarPlanos();
   gerarMatriculaAutomatica();
   carregarAlunos().then(() => {
+    if (window.location.pathname.includes("configuracoes.html")) {
+        window.carregarConfigPix();
+        window.carregarTabelaPlanosConfig();
+    }
     const buscaInput = document.getElementById("buscaNome");
     if (buscaInput) {
       buscaInput.addEventListener("input", carregarAlunos);

@@ -158,12 +158,37 @@ export const inicializarHeaderUsuario = async () => {
     }
 
     headerContainer.innerHTML = `
-        <div class="user-info-box">
-            <span class="user-info-name">${profile?.nome || 'Usuário'}</span>
-            <span class="user-info-role">${profile?.role === 'admin' ? 'Administrador' : profile?.role === 'professor' ? 'Professor' : 'Colaborador'}</span>
+        <button id="btnToggleMenu" class="btn-toggle-menu" title="Alternar Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <div class="user-right-section">
+            <div class="user-info-box">
+                <span class="user-info-name">${profile?.nome || 'Usuário'}</span>
+                <span class="user-info-role">${profile?.role === 'master' ? '👑 Master' : profile?.role === 'admin' ? '🏢 Empresário' : profile?.role === 'professor' ? '👨‍🏫 Professor' : '🤝 Colaborador'}</span>
+            </div>
+            <button class="btn-logout-header" id="btnLogoutHeader">Sair</button>
         </div>
-        <button class="btn-logout-header" id="btnLogoutHeader">Sair</button>
     `;
+
+    // Lógica para esconder/mostrar o menu lateral
+    const menu = document.getElementById('menu');
+    const btnToggle = document.getElementById('btnToggleMenu');
+
+    // Restaurar estado do menu do navegador (se o usuário deixou fechado antes)
+    if (localStorage.getItem('sidebar-collapsed') === 'true') {
+        menu?.classList.add('collapsed');
+    }
+
+    btnToggle?.addEventListener('click', () => {
+        if (menu) {
+            menu.classList.toggle('collapsed');
+            localStorage.setItem('sidebar-collapsed', menu.classList.contains('collapsed'));
+        }
+    });
 
     document.getElementById('btnLogoutHeader')?.addEventListener('click', async () => {
         if (!confirm("Deseja realmente sair do sistema?")) return;

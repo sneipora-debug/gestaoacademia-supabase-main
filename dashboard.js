@@ -6,14 +6,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     await inicializarHeaderUsuario();
 
     // Acorda o banco de dados para conferir se precisa gerar parcelas novas para o mês atual
-    await supabaseClient.rpc('gerar_mensalidades_automaticas');
+    try {
+        await supabaseClient.rpc('gerar_mensalidades_automaticas');
+    } catch (e) { console.warn("Falha ao gerar mensalidades:", e); }
 
-    // Busca estatísticas apenas de alunos
-    const { data: alunos } = await supabaseClient
-        .from("alunos")
-        .select("*")
-        .or('role.eq.student,role.is.null')
-        .not('role', 'in', '("admin","professor","staff")');
+    // HIERARQUIA: Filtra alunos baseado no perfil logado
+    const { data: userData } = await supabaseClient.auth.getUser();
+    const authUser = userData?.user;
+
+    let query = supabaseClient.from("alunos").select("*");
+
+    if (authUser) {
+        const { data: profile } = await supabaseClient.from("equipe").select("id, role").eq("user_id", authUser.id).maybeSingle();
+        if (profile && profile.role === 'professor') {
+            query = query.eq('professor_id', profile.id);
+        }
+    }
+
+
+    const { data: alunos } = await query;
         
     const { data: pagamentos } = await supabaseClient.from("pagamentos").select("*");
     const { data: cobrancas } = await supabaseClient.from("cobrancas").select("*");
