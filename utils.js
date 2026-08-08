@@ -178,15 +178,29 @@ export const inicializarHeaderUsuario = async () => {
     const menu = document.getElementById('menu');
     const btnToggle = document.getElementById('btnToggleMenu');
 
-    // Restaurar estado do menu do navegador (se o usuário deixou fechado antes)
-    if (localStorage.getItem('sidebar-collapsed') === 'true') {
+    // No celular, o menu deve começar sempre fechado para não tampar a tela ao carregar
+    const isMobile = () => window.innerWidth <= 768;
+
+    if (isMobile()) {
+        menu?.classList.add('collapsed');
+    } else if (localStorage.getItem('sidebar-collapsed') === 'true') {
         menu?.classList.add('collapsed');
     }
 
     btnToggle?.addEventListener('click', () => {
         if (menu) {
             menu.classList.toggle('collapsed');
-            localStorage.setItem('sidebar-collapsed', menu.classList.contains('collapsed'));
+            // No computador, lembramos se o usuário prefere o menu aberto ou fechado
+            if (!isMobile()) {
+                localStorage.setItem('sidebar-collapsed', menu.classList.contains('collapsed'));
+            }
+        }
+    });
+
+    // No celular, ao clicar em qualquer opção do menu, ele deve "se esconder" automaticamente
+    menu?.addEventListener('click', (e) => {
+        if (isMobile() && e.target.closest('a')) {
+            menu.classList.add('collapsed');
         }
     });
 

@@ -254,6 +254,7 @@
       <div id="menu"></div>
 
       <main>
+        <div class="user-header"></div>
         <header>
           <h1>Gestão de Alunos</h1>
           <p>Clique em qualquer aluno para abrir o histórico completo de pagamentos.</p>
@@ -1008,7 +1009,13 @@
       //  SUBSTITUIR adicionarLinhaTabela PARA INCLUIR CLICK NO MODAL
       //  (Override da função de script.js para esta página)
       // ================================================================
-      document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Inicializa o cabeçalho e segurança
+        try {
+            const { inicializarHeaderUsuario } = await import('./utils.js');
+            await inicializarHeaderUsuario();
+        } catch (e) { console.error("Erro ao carregar cabeçalho:", e); }
+
         // Aguarda o script.js terminar, depois reescreve a tabela com click
         setTimeout(() => {
           // Adiciona event delegation na tabela para abrir modal

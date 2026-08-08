@@ -501,6 +501,7 @@ input:checked + .slider-toggle:before {
         padding: 0 20px !important;
         margin-bottom: 0 !important;
         z-index: 2001;
+        justify-content: space-between !important;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
@@ -537,7 +538,6 @@ input:checked + .slider-toggle:before {
     .botoes {
         flex-direction: column;
     }
-}
 
     .financeiro-container {
         grid-template-columns: 1fr;
@@ -566,10 +566,36 @@ input:checked + .slider-toggle:before {
     }
 
     header h1 {
-        font-size: 28px;
+        font-size: 24px;
     }
 
-    .botoes {
-        flex-direction: column;
+    header p {
+        font-size: 14px;
     }
 
+    .card h2 {
+        font-size: 1.2rem;
+    }
+
+    .card-stats h3 {
+        font-size: 0.75rem;
+    }
+
+    .card-stats p {
+        font-size: 1.3rem;
+    }
+
+    .profile-info h2 {
+        font-size: 1.4rem;
+    }
+
+    th, td {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    .btn-logout-header {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+}
